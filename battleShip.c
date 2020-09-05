@@ -14,13 +14,13 @@
 // #define B3_SIZE 3
 // #define B2_SIZE 2
 
-#define INIT_BARCOS (barco_S) \
-                    { \
-                    .b5 = 1, \
-                    .b4 = 1, \
-                    .b3 = 2, \
-                    .b2 = 1 \
-                    }
+// #define INIT_BARCOS (barco_S) \
+//                     { \
+//                     .b5 = 1, \
+//                     .b4 = 1, \
+//                     .b3 = 2, \
+//                     .b2 = 1 \
+//                     }
 
 typedef enum barco_e
 {
@@ -32,12 +32,19 @@ typedef enum barco_e
     BARCOTOT        // 6
 } barco_E;
 
+typedef struct coord_s 
+{
+    uint8_t x;
+    uint8_t y;
+} coord_S;
+
 typedef struct barco_s
 {
-    uint8_t b5 : 1;
-    uint8_t b4 : 1;
-    uint8_t b3 : 2;
-    uint8_t b2 : 1;
+    coord_S b5[BARCO5];
+    coord_S b4[BARCO4];
+    coord_S b3_0[BARCO3];
+    coord_S b3_1[BARCO3];
+    coord_S b2[BARCO2];
 } barco_S;
 
 typedef struct celda_s {
@@ -45,12 +52,18 @@ typedef struct celda_s {
     barco_E barco;
 } celda_S;
 
+typedef struct datos_s 
+{
+    uint8_t numero : 2;
+    uint8_t barcosDerrotados : 3;
+    uint8_t turno : 1;
+} datos_S;
 typedef struct jugador_s
 {
     celda_S tablero[SIZE][SIZE];
     char juego[SIZE][SIZE];
-    barco_S estadoBarcos;
-    uint8_t numero;
+    barco_S barcos;
+    datos_S datos;
 } jugador_S;
 
 void printTablero(jugador_S*);
@@ -60,34 +73,31 @@ void enterCoordX(uint8_t*);
 void enterCoordY(uint8_t*);
 // _Bool checkCell(jugador_S*, uint8_t, uint8_t);
 void turno(jugador_S*, jugador_S*);
+void decideNextTurn(jugador_S*, jugador_S*);
 
 int main(void)
 {
     jugador_S j1;
     jugador_S j2;
 
-    memset(j1.tablero, 0, sizeof(j1.tablero));
-    memset(j2.tablero, 0, sizeof(j2.tablero));
-    memset(j1.juego, 0, sizeof(j1.juego));
-    memset(j2.juego, 0, sizeof(j2.juego));
+    memset(&j1, 0, sizeof(j1));
+    memset(&j2, 0, sizeof(j2));
 
-    j1.estadoBarcos = INIT_BARCOS;
-    j2.estadoBarcos = INIT_BARCOS;
+    j1.datos.numero = 1;
+    j1.datos.turno = (uint8_t)true;
+    j2.datos.numero = 2;
 
-    j1.numero = 1;
-    j2.numero = 2;
-
-    printf("Bienvenido Jugador %d: \n", j1.numero);
-
+    printf("Bienvenido Jugador %d: \n", j1.datos.numero);
     fillBoard(&j1, BARCO5);
     fillBoard(&j1, BARCO4);
     fillBoard(&j1, BARCO3);
     fillBoard(&j1, BARCO3);
     fillBoard(&j1, BARCO2);
-    printTablero(&j1);
+    // printTablero(&j1);
 
-    printf("Bienvenido Jugador %d: \n", j2.numero);
+    system("clear");
 
+    printf("Bienvenido Jugador %d: \n", j2.datos.numero);
     fillBoard(&j2, BARCO5);
     fillBoard(&j2, BARCO4);
     fillBoard(&j2, BARCO3);
@@ -95,29 +105,50 @@ int main(void)
     fillBoard(&j2, BARCO2);
     printTablero(&j2);
 
+    system("clear");
+
+    // START GAME
+    // while (j1.datos.barcosDerrotados != 5)
+    // {
+    //     if (j1.datos.turno == 1)
+    //     {
+    //         /* code */
+    //     }
+        
+        
+        
+        
+        
+        
+        
+    //     decideNextTurn(&j1, &j2);
+    // }
+    
     // printJuego(&j1);
     // printJuego(&j2);
 
     return 0;
 }
 
+void decideNextTurn(jugador_S *j1, jugador_S *j2)
+{
+
+}
+
 void printTablero(jugador_S *jugador)
 {
     printf("\n");
-    printf("Jugador %d \n", jugador->numero);
+    printf("Jugador %d -> ", jugador->datos.numero);
+    printf("Tablero de Barcos. \n");
+    printf("\n");
     for (size_t i = 0; i < SIZE; i++)
     {
+        printf("|");
         for (size_t j = 0; j < SIZE; j++)
         {
-            printf("\t");
-            printf("%c", jugador->tablero[i][j].state);
-            printf("\t");
+            char lt = (jugador->tablero[i][j].state == 0) ? ' ' : jugador->tablero[i][j].state;
+            printf("%c", lt);
             printf("|");
-        }
-        printf("\n");
-        for (size_t k = 0; k < SIZE; k++)
-        {
-            printf("----------------");
         }
         printf("\n");
     }
@@ -126,20 +157,16 @@ void printTablero(jugador_S *jugador)
 void printJuego(jugador_S *jugador)
 {
     printf("\n");
-    printf("Jugador %d \n", jugador->numero);
+    printf("Jugador %d -> ", jugador->datos.numero);
+    printf("Tablero de Juego.\n");
     for (size_t i = 0; i < SIZE; i++)
     {
+        printf("|");
         for (size_t j = 0; j < SIZE; j++)
         {
-            // printf("\t");
-            printf("%c", jugador->juego[i][j]);
-            // printf("\t");
+            char lt = (jugador->juego[i][j] == 0) ? ' ' : jugador->juego[i][j];
+            printf("%c", lt);
             printf("|");
-        }
-        printf("\n");
-        for (size_t k = 0; k < SIZE; k++)
-        {
-            printf("--------");
         }
         printf("\n");
     }
@@ -165,6 +192,7 @@ void fillBoard(jugador_S *j, barco_E b)
     uint32_t y = 0;
     unsigned char dir[2];
     _Bool valid = true;
+    _Bool repeat = false;
 
     printf("Ingresa las coordernadas iniciales para el barco %d: \n", b);
     enterCoordX(&x);
@@ -180,12 +208,13 @@ void fillBoard(jugador_S *j, barco_E b)
     while (i < (uint16_t)b)
     {
         if ( (j->tablero[x][y].barco != BARCO0) || (x > 9) || (y > 9) || \
-                ((dir[0] == 'x') && ((y + (uint16_t)b) > 10)) || \
-                    ((dir[0] == 'y') && ((x + (uint16_t)b) > 10)) )
+                ((dir[0] == 'x') && ((y_i + (uint16_t)b - 1) > 9)) || \
+                    ((dir[0] == 'y') && ((x_i + (uint16_t)b - 1) > 9)) )
         {
             valid = false;
             printf("1 o más coordenadas, ocupadas, erroneas o fuera de rango. Ingrese de nuevo.\n");
-            fillBoard(j, b);
+            repeat = true;
+            break;
         }
 
         if (dir[0] == 'x') {
@@ -195,25 +224,67 @@ void fillBoard(jugador_S *j, barco_E b)
             x++;
         }
         else {
-
+            // No action
         }
         
         ++i;
     }
     i = 0;
-    while ((i < (uint16_t)b) && (valid))
+    while ((i < (uint16_t)b) && (valid) && (!repeat))
     {
         j->tablero[x_i][y_i].state = letraBarco[(uint16_t)b];
         j->tablero[x_i][y_i].barco = b;
+        switch (b)
+        {
+            case BARCO2:
+                j->barcos.b2[i].x = x_i;
+                j->barcos.b2[i].y = y_i;
+                break;
+            case BARCO3:
+                if (j->barcos.b3_0[i].x == 0)
+                {
+                    j->barcos.b3_0[i].x = x_i;
+                }
+                else
+                {
+                    j->barcos.b3_1[i].x = x_i;
+                }
+
+                if (j->barcos.b3_0[i].y == 0)
+                {
+                    j->barcos.b3_0[i].y = y_i;
+                }
+                else
+                {
+                    j->barcos.b3_1[i].y = y_i;
+                }
+                break;
+            case BARCO4:
+                j->barcos.b4[i].x = x_i;
+                j->barcos.b4[i].y = y_i;
+                break;
+            case BARCO5:
+                j->barcos.b5[i].x = x_i;
+                j->barcos.b5[i].y = y_i;
+                break;
+            default:
+            case BARCO0:
+                break;
+        }
         y_i += (dir[0] == 'x') ? 1 : 0;
         x_i += (dir[0] == 'y') ? 1 : 0;
-        // if (dir[0] == 'x') {
-        //     y_i++;
-        // }
-        // else if (dir[0] == 'y') {
-        //     x_i++;
-        // }
         ++i;
+    }
+
+    if (repeat)
+    {
+        repeat = false;
+        fillBoard(j, b);
+    }
+    else
+    {
+        printTablero(j);
+        printf("\n");
     }
 }
 
