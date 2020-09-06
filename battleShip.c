@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #define SIZE 10
 #define NUM_B5 1
@@ -9,6 +10,7 @@
 #define NUM_B3 2
 #define NUM_B2 1
 
+#define TOTAL_BARCOS 1
 // #define B5_SIZE 5
 // #define B4_SIZE 4
 // #define B3_SIZE 3
@@ -42,11 +44,19 @@ typedef struct barco_s
 {
     coord_S b5[BARCO5];
     coord_S b4[BARCO4];
-    coord_S b3_0[BARCO3];
-    coord_S b3_1[BARCO3];
+    coord_S b3[2][BARCO3];
+    // coord_S b3_1[BARCO3];
     coord_S b2[BARCO2];
 } barco_S;
 
+typedef struct barcoEstatus_s
+{
+    uint8_t b5;
+    uint8_t b4;
+    uint8_t b3[2];
+    uint8_t b2;
+} barcoEstatus_S;
+// Check bitfield above
 typedef struct celda_s {
     char state;
     barco_E barco;
@@ -63,6 +73,7 @@ typedef struct jugador_s
     celda_S tablero[SIZE][SIZE];
     char juego[SIZE][SIZE];
     barco_S barcos;
+    barcoEstatus_S bEstatus;
     datos_S datos;
 } jugador_S;
 
@@ -73,12 +84,13 @@ void enterCoordX(uint8_t*);
 void enterCoordY(uint8_t*);
 // _Bool checkCell(jugador_S*, uint8_t, uint8_t);
 void turno(jugador_S*, jugador_S*);
-void decideNextTurn(jugador_S*, jugador_S*);
+void decideNextTurn(jugador_S*, jugador_S*, _Bool*);
 
 int main(void)
 {
     jugador_S j1;
     jugador_S j2;
+    _Bool game = true;
 
     memset(&j1, 0, sizeof(j1));
     memset(&j2, 0, sizeof(j2));
@@ -89,50 +101,73 @@ int main(void)
 
     printf("Bienvenido Jugador %d: \n", j1.datos.numero);
     fillBoard(&j1, BARCO5);
-    fillBoard(&j1, BARCO4);
-    fillBoard(&j1, BARCO3);
-    fillBoard(&j1, BARCO3);
-    fillBoard(&j1, BARCO2);
-    // printTablero(&j1);
-
+    // fillBoard(&j1, BARCO4);
+    // fillBoard(&j1, BARCO3);
+    // fillBoard(&j1, BARCO3);
+    // fillBoard(&j1, BARCO2);
+    sleep(4);
     system("clear");
 
     printf("Bienvenido Jugador %d: \n", j2.datos.numero);
     fillBoard(&j2, BARCO5);
-    fillBoard(&j2, BARCO4);
-    fillBoard(&j2, BARCO3);
-    fillBoard(&j2, BARCO3);
-    fillBoard(&j2, BARCO2);
-    printTablero(&j2);
-
+    // fillBoard(&j2, BARCO4);
+    // fillBoard(&j2, BARCO3);
+    // fillBoard(&j2, BARCO3);
+    // fillBoard(&j2, BARCO2);
+    sleep(4);
     system("clear");
 
     // START GAME
-    // while (j1.datos.barcosDerrotados != 5)
-    // {
-    //     if (j1.datos.turno == 1)
-    //     {
-    //         /* code */
-    //     }
-        
-        
-        
-        
-        
-        
-        
-    //     decideNextTurn(&j1, &j2);
-    // }
+    printf("A jugar. \n");
+    while (game)
+    {
+        if (j1.datos.turno == 1)
+        {
+            printf("Turno de jugador %d.\n", j1.datos.numero);
+            printf("\n");
+            printJuego(&j1);
+            printf("\n");
+            turno(&j1, &j2); // J1 ataca, J2 defiende
+        }
+        else
+        {
+            printf("Turno de jugador %d.\n", j2.datos.numero);
+            printf("\n");
+            printJuego(&j2);
+            printf("\n");
+            turno(&j2, &j1); // J2 ataca, J1 defiende
+        }
+        decideNextTurn(&j1, &j2, &game);
+    }
     
-    // printJuego(&j1);
-    // printJuego(&j2);
+    // Print ganador.
+
 
     return 0;
 }
 
-void decideNextTurn(jugador_S *j1, jugador_S *j2)
+void decideNextTurn(jugador_S *j1, jugador_S *j2, _Bool *game)
 {
-
+    if ((j1->datos.barcosDerrotados == TOTAL_BARCOS))
+    {
+        *game = false;
+        printf("GANASTE JUGADOR: %d", j1->datos.numero);
+    }
+    else if ((j2->datos.barcosDerrotados == TOTAL_BARCOS))
+    {
+        *game = false;
+        printf("GANASTE JUGADOR: %d", j2->datos.numero);
+    }
+    else if (j1->datos.turno == 1)
+    {
+        j1->datos.turno = 0;
+        j2->datos.turno = 1;
+    }
+    else
+    {
+        j1->datos.turno = 1;
+        j2->datos.turno = 0;
+    }
 }
 
 void printTablero(jugador_S *jugador)
@@ -170,6 +205,7 @@ void printJuego(jugador_S *jugador)
         }
         printf("\n");
     }
+    printf("\n");
 }
 
 void enterCoordX(uint8_t *coordx)
@@ -241,22 +277,22 @@ void fillBoard(jugador_S *j, barco_E b)
                 j->barcos.b2[i].y = y_i;
                 break;
             case BARCO3:
-                if (j->barcos.b3_0[i].x == 0)
+                if (j->barcos.b3[0][i].x == 0)
                 {
-                    j->barcos.b3_0[i].x = x_i;
+                    j->barcos.b3[0][i].x = x_i;
                 }
                 else
                 {
-                    j->barcos.b3_1[i].x = x_i;
+                    j->barcos.b3[1][i].x = x_i;
                 }
 
-                if (j->barcos.b3_0[i].y == 0)
+                if (j->barcos.b3[0][i].y == 0)
                 {
-                    j->barcos.b3_0[i].y = y_i;
+                    j->barcos.b3[0][i].y = y_i;
                 }
                 else
                 {
-                    j->barcos.b3_1[i].y = y_i;
+                    j->barcos.b3[1][i].y = y_i;
                 }
                 break;
             case BARCO4:
@@ -293,7 +329,9 @@ void turno(jugador_S* j_a, jugador_S* j_d)
     uint32_t x = 0; // Problem with memory if uint8_t is used
     uint32_t y = 0;
     _Bool valid = true;
+    _Bool repeat = false;
 
+    printf("\n");
     printf("Ingresa la coordernada de ataque: \n");
     enterCoordX(&x);
     enterCoordY(&y);
@@ -302,41 +340,139 @@ void turno(jugador_S* j_a, jugador_S* j_d)
     {
         valid = false;
         printf("Coordenada fuera de rango. Ingrese de nuevo.\n");
-        turno(j_a, j_d);
+        repeat = true;
     }
-    else if (j_a->juego[x][y] == 'X') {
+    else if ((j_a->juego[x][y] == 'X') || (j_a->juego[x][y] == 'O')) {
         valid = false;
         printf("Coordenada ingresada previamente. Ingrese de nuevo.\n");
-        turno(j_a, j_d);
+        repeat = true;
     }
     else {
         j_a->juego[x][y] = 'X';
     }
     
 
-    if (j_d->tablero[x][y].barco != BARCO0)
+    if ((j_d->tablero[x][y].barco != BARCO0) && (valid)) // Le diste a uno
     {
-        // Le diste a uno
         j_d->tablero[x][y].state = 'X';
-        j_d->tablero[x][y].barco = BARCO0;
-        // Revisa si ya acabaste con un barco
-        // Continua tirando.
+        // Checar tablero para ver cual fue, y ver si ya se destruyó.
+        switch (j_d->tablero[x][y].barco)
+        {
+            case BARCO2:
+                for (size_t i = 0; i < BARCO2; i++)
+                {
+                    if ((j_d->barcos.b2[i].x == x) && (j_d->barcos.b2[i].y == y))
+                    {
+                        j_d->barcos.b2[i].x = 10;
+                        j_d->barcos.b2[i].y = 10;
+
+                        ++j_a->bEstatus.b2;
+                        j_a->juego[x][y] = 'O'; // Cambia caracter para indicar que ahi habia un barco.
+                    }
+                    // Revisa si ya acabaste con el barco
+                    if (j_a->bEstatus.b2 == BARCO2)
+                    {
+                        ++j_a->datos.barcosDerrotados;
+                    }
+                }
+                // IDEA A PROBAR: #define BNUM(enum) .b#enum
+                // #define STR(x) #x
+                break;
+            case BARCO3:
+                for (size_t i = 0; i < BARCO3*2; i++)
+                {
+                    uint8_t index;
+                    index = (i < 3) ? 0 : 1; // Primer o segundo barco 3
+                    
+                    if ((j_d->barcos.b3[index][i].x == x) && (j_d->barcos.b3[index][i].y == y))
+                    {
+                        j_d->barcos.b3[index][i].x = 10;
+                        j_d->barcos.b3[index][i].y = 10;
+
+                        ++j_a->bEstatus.b3[index];
+                        j_a->juego[x][y] = 'O'; // Cambia caracter para indicar que ahi habia un barco.
+                    }
+                    // Revisa si ya acabaste con el barco
+                    if (j_a->bEstatus.b3[index] == BARCO3)
+                    {
+                        ++j_a->datos.barcosDerrotados;
+                    }
+                }
+                break;
+            case BARCO4:
+                for (size_t i = 0; i < BARCO4; i++)
+                {
+                    if ((j_d->barcos.b4[i].x == x) && (j_d->barcos.b4[i].y == y))
+                    {
+                        j_d->barcos.b4[i].x = 10;
+                        j_d->barcos.b4[i].y = 10;
+
+                        ++j_a->bEstatus.b4;
+                        j_a->juego[x][y] = 'O'; // Cambia caracter para indicar que ahi habia un barco.
+                    }
+                    // Revisa si ya acabaste con el barco
+                    if (j_a->bEstatus.b4 == BARCO4)
+                    {
+                        ++j_a->datos.barcosDerrotados;
+                    }
+                }
+                break;
+            case BARCO5:
+                for (size_t i = 0; i < BARCO5; i++)
+                {
+                    if ((j_d->barcos.b5[i].x == x) && (j_d->barcos.b5[i].y == y))
+                    {
+                        j_d->barcos.b5[i].x = 10;
+                        j_d->barcos.b5[i].y = 10;
+
+                        ++j_a->bEstatus.b5;
+                        j_a->juego[x][y] = 'O'; // Cambia caracter para indicar que ahi habia un barco.
+                    }
+                    // Revisa si ya acabaste con el barco
+                    if (j_a->bEstatus.b5 == BARCO5)
+                    {
+                        ++j_a->datos.barcosDerrotados;
+                    }
+                }
+                break;
+            default:
+            case BARCO0:
+                break;
+        }
+
+        j_d->tablero[x][y].barco = BARCO0; // Clear 
+        repeat = true;
+        printf("Le diste, repite turno.\n");
+        printJuego(j_a);
+    }
+    else if (valid)
+    {
+        printf("No acertaste.\n");
+    }
+    else
+    {
+        // No action
+    }
+    
+    
+
+    // Continua tirando. repeat
+    if (repeat)
+    {
+        if (j_a->datos.barcosDerrotados == TOTAL_BARCOS)
+        {
+            repeat = false;
+        }
+        else
+        {
+            repeat = false;
+            turno(j_a, j_d);
+        }
+    }
+    else
+    {
+        printJuego(j_a);
     }
     
     
 }
-
-// void checkBoardStatus(jugador_S*)
-// {
-//     uint8_t b5 = 5;
-//     uint8_t b4 = 4;
-//     uint8_t b3 = 6;
-//     uint8_t b2 = 2;
-//     for (size_t i = 0; i < SIZE; i++)
-//     {
-//         for (size_t j = 0; j < SIZE; j++)
-//         {
-            
-//         }
-//     }
-// }
