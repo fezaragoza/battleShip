@@ -13,7 +13,7 @@
 * DEFINES
 */
 #define SIZE 10
-#define TOTAL_BARCOS 2
+#define TOTAL_BARCOS 5
 
 /*
 * TYPEDEFS
@@ -49,7 +49,6 @@ typedef struct barcoEstatus_s
     uint8_t b3[2];
     uint8_t b2;
 } barcoEstatus_S;
-// Check bitfield above
 
 typedef struct celda_s {
     char state;
@@ -102,19 +101,19 @@ int main(void)
     j2.datos.numero = 2;
 
     printf("Bienvenido Jugador %d: \n", j1.datos.numero);
-    // fillBoard(&j1, BARCO5);
+    fillBoard(&j1, BARCO5);
     fillBoard(&j1, BARCO4);
-    // fillBoard(&j1, BARCO3);
-    // fillBoard(&j1, BARCO3);
+    fillBoard(&j1, BARCO3);
+    fillBoard(&j1, BARCO3);
     fillBoard(&j1, BARCO2);
 
     system("clear");
 
     printf("Bienvenido Jugador %d: \n", j2.datos.numero);
-    // fillBoard(&j2, BARCO5);
+    fillBoard(&j2, BARCO5);
     fillBoard(&j2, BARCO4);
-    // fillBoard(&j2, BARCO3);
-    // fillBoard(&j2, BARCO3);
+    fillBoard(&j2, BARCO3);
+    fillBoard(&j2, BARCO3);
     fillBoard(&j2, BARCO2);
     
     system("clear");
@@ -443,25 +442,27 @@ void checkShipCell(jugador_S* j_a, jugador_S* j_d, uint8_t x, uint8_t y)
             }
             break;
         case BARCO3:
-            for (size_t i = 0; i < BARCO3*2; i++)
+            for (size_t j = 0; j < 2; j++)
             {
-                uint8_t index;
-                index = (i < BARCO3) ? 0 : 1; // Primer o segundo barco 3
-                
-                if ((j_d->barcos.b3[index][i].x == x) && (j_d->barcos.b3[index][i].y == y))
+                for (size_t i = 0; i < BARCO3; i++)
                 {
-                    j_d->barcos.b3[index][i].x = 10;
-                    j_d->barcos.b3[index][i].y = 10;
+                    if ((j_d->barcos.b3[j][i].x == x) && (j_d->barcos.b3[j][i].y == y))
+                    {
+                        j_d->barcos.b3[j][i].x = 10;
+                        j_d->barcos.b3[j][i].y = 10;
 
-                    ++j_a->bEstatus.b3[index];
-                    j_a->juego[x][y] = 'O'; // Cambia caracter para indicar que ahi habia un barco.
-                }
-                // Revisa si ya acabaste con el barco
-                if (j_a->bEstatus.b3[index] == BARCO3)
-                {
-                    ++j_a->datos.barcosDerrotados;
+                        ++j_a->bEstatus.b3[j];
+                        j_a->juego[x][y] = 'O'; // Cambia caracter para indicar que ahi habia un barco.
+                    }
+                    // Revisa si ya acabaste con el barco
+                    if (j_a->bEstatus.b3[j] == BARCO3)
+                    {
+                        j_a->bEstatus.b3[j] = 0;
+                        ++j_a->datos.barcosDerrotados;
+                    }
                 }
             }
+            
             break;
         case BARCO4:
             for (size_t i = 0; i < BARCO4; i++)
