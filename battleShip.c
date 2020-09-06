@@ -1,7 +1,7 @@
 // battleShip.c -- by Fernando Zaragoza
 
 /*
-* iNCLUDES
+* INCLUDES
 */
 #include <stdio.h>
 #include <stdint.h>
@@ -13,7 +13,7 @@
 * DEFINES
 */
 #define SIZE 10
-#define TOTAL_BARCOS 1
+#define TOTAL_BARCOS 2
 
 /*
 * TYPEDEFS
@@ -103,14 +103,16 @@ int main(void)
 
     printf("Bienvenido Jugador %d: \n", j1.datos.numero);
     // fillBoard(&j1, BARCO5);
-    // fillBoard(&j1, BARCO4);
+    fillBoard(&j1, BARCO4);
     // fillBoard(&j1, BARCO3);
     // fillBoard(&j1, BARCO3);
     fillBoard(&j1, BARCO2);
 
+    system("clear");
+
     printf("Bienvenido Jugador %d: \n", j2.datos.numero);
     // fillBoard(&j2, BARCO5);
-    // fillBoard(&j2, BARCO4);
+    fillBoard(&j2, BARCO4);
     // fillBoard(&j2, BARCO3);
     // fillBoard(&j2, BARCO3);
     fillBoard(&j2, BARCO2);
@@ -174,6 +176,7 @@ void printTablero(jugador_S *jugador)
         }
         printf("\n");
     }
+    printf("\n");
 }
 
 void printJuego(jugador_S *jugador)
@@ -311,11 +314,10 @@ void fillBoard(jugador_S *j, barco_E b)
     else
     {
         printTablero(j);
-        // printf("\n");
         printf("Press ENTER key to Continue.\n");
         while(getchar()!='\n');
         getchar();
-        system("clear"); 
+        // system("clear"); 
     }
 }
 
@@ -350,10 +352,11 @@ void turno(jugador_S* j_a, jugador_S* j_d)
     _Bool valid = true;
     _Bool repeat = false;
 
-    // printf("\n");
     printf("Ingresa la coordernada de ataque: \n");
     enterCoordX(&x);
     enterCoordY(&y);
+    // sleep(2);
+    // system("clear");
 
     if ((x > 9) || (y > 9))
     {
@@ -379,10 +382,6 @@ void turno(jugador_S* j_a, jugador_S* j_d)
         printf("Le diste, repite turno.\n");
         printJuego(j_a);
         printf("\n");
-        // printf("Press ENTER key to Continue.\n");
-        // while(getchar()!='\n');
-        // getchar();
-        // system("clear"); 
     }
     else if (valid)
     {
