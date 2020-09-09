@@ -50,7 +50,8 @@ typedef struct barcoEstatus_s
     uint8_t b2;
 } barcoEstatus_S;
 
-typedef struct celda_s {
+typedef struct celda_s
+{
     char state;
     barco_E barco;
 } celda_S;
@@ -146,7 +147,7 @@ int main(void)
 */
 void printHeader(void)
 {
-    printf("   ");
+    printf("x|y ");
     for (size_t i = 0; i < SIZE; i++)
     {
         printf("%i", i);
@@ -166,7 +167,7 @@ void printTablero(jugador_S *jugador)
     for (size_t i = 0; i < SIZE; i++)
     {
         printf("%d", i);
-        printf(" |");
+        printf("  |");
         for (size_t j = 0; j < SIZE; j++)
         {
             char lt = (jugador->tablero[i][j].state == 0) ? ' ' : jugador->tablero[i][j].state;
@@ -189,7 +190,7 @@ void printJuego(jugador_S *jugador)
     for (size_t i = 0; i < SIZE; i++)
     {
         printf("%d", i);
-        printf(" |");
+        printf("  |");
         for (size_t j = 0; j < SIZE; j++)
         {
             char lt = (jugador->juego[i][j] == 0) ? ' ' : jugador->juego[i][j];
